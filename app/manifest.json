@@ -2,7 +2,7 @@
   "name": "__MSG_appName__",
   "short_name": "__MSG_appShortName__",
   "description": "__MSG_appDescription__",
-  "version": "4.1.4",
+  "version": "2.0",
   "manifest_version": 3,
   "default_locale": "en",
   "icons": {
@@ -15,6 +15,13 @@
     "type": "module"
   },
   "commands": {
+    "open-options": {
+      "description": "Open options page",
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      }
+    },
     "01-newtab": { "description": "TABS: New tab" },
     "02-closetab": { "description": "TABS: Close tab" },
     "03-nexttab": { "description": "TABS: Next tab" },
@@ -106,7 +113,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["https://*.app.netsuite.com/*"],
       "js": ["scripts/content.js"],
       "run_at": "document_end",
       "all_frames": false

@@ -1,14 +1,14 @@
 {
   "appName": {
-    "message": "Shortkeys (Custom Keyboard Shortcuts)",
+    "message": "NetSuite Keyboard Shortcuts (New Beginning)",
     "description": "The name of the application"
   },
   "appShortName": {
-    "message": "Shortkeys",
+    "message": "NS Shortcuts NB",
     "description": "The short_name (maximum of 12 characters recommended) is a short version of the app's name."
   },
   "appDescription": {
-    "message": "Custom keyboard shortcuts for your browser",
+    "message": "Custom keyboard shortcuts for NetSuite",
     "description": "The description of the application"
   }
 }
