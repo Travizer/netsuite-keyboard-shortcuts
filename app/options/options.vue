@@ -49,10 +49,7 @@
 
                 <b-table
                         :data="keys"
-                        ref="table"
-                        detailed
-                        detail-key="key"
-                        :show-detail-icon="showDetailIcon">
+                        ref="table">
 
                     <template slot-scope="props">
                         <b-table-column field="key" label="Shortcut" sortable>
@@ -67,7 +64,7 @@
                             </b-field>
                         </b-table-column>
 
-                        <b-table-column field="action" label="Behavior" sortable>
+                        <!--<b-table-column field="action" label="Behavior" sortable>
                             <b-field>
                                 <b-select v-model="props.row.action">
                                     <optgroup v-for="(group, name) in actions" :label="name">
@@ -75,7 +72,13 @@
                                     </optgroup>
                                 </b-select>
                             </b-field>
-                        </b-table-column>
+                        </b-table-column>-->
+
+                      <b-table-column field="code" label="Code" sortable>
+                        <b-field>
+                          <b-input v-model="props.row.code"/>
+                        </b-field>
+                      </b-table-column>
 
                         <b-table-column field="delete">
                             <b-button rounded icon-right="delete" @click="deleteShortcut(props.row)" />
@@ -173,7 +176,7 @@
                 <div class="level">
                     <div class="level-left">
                         <b-field>
-                            <b-button @click="keys.push({})">Add shortcut</b-button>
+                            <b-button @click="keys.push({ action: 'javascript' })">Add shortcut</b-button>
                         </b-field>
                     </div>
                     <div class="level-right">
@@ -210,6 +213,7 @@ import LinkBar from "./components/LinkBar";
 import SelectInput from "./components/SelectInput";
 import TextareaInput from "./components/TextareaInput";
 import SelectGroupInput from "./components/SelectGroupInput";
+import StorageWrapper from "../shared/storageWrapper";
 
 export default {
     components: {
@@ -243,7 +247,7 @@ export default {
                 key.sitesArray = key.sites.split('\n');
                 delete key.sidebarOpen;
             });
-            await chrome.storage.local.set({ keys: JSON.stringify(this.keys) });
+            StorageWrapper.shortkeys = { keys: JSON.stringify(this.keys) };
             this.$buefy.snackbar.open(`Shortcuts have been saved!`);
         },
         importKeys: function() {
@@ -382,7 +386,7 @@ export default {
             }
         };
 
-        const savedKeys = await chrome.storage.local.get('keys')
+        const savedKeys = await StorageWrapper.shortkeys
         if (savedKeys.keys) {
                 this.keys = [...JSON.parse(savedKeys.keys)];
         } else {

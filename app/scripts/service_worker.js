@@ -4,6 +4,9 @@ import captureScreenshot from './actions/captureScreenshot'
 import lastUsedTab from './actions/lastUsedTab'
 import { executeScript } from './utils'
 import { v4 as uuid } from "uuid"
+import StorageWrapper from './../shared/storageWrapper';
+
+await StorageWrapper.initShortkeys()
 
 /* global localStorage, chrome */
 
@@ -379,17 +382,17 @@ let handleAction = async (action, request = {}) => {
 }
 
 async function checkKeys() {
-  const keys = JSON.parse((await chrome.storage.local.get("keys")).keys) || []
+  const keys = JSON.parse((await StorageWrapper.shortkeys).keys) || []
   for (const key of keys) {
     if (!key.id) {
       key.id = uuid()
     }
   }
-  await chrome.storage.local.set({ keys: JSON.stringify(keys) });
+  StorageWrapper.shortkeys = { keys: JSON.stringify(keys) };
 }
 
 async function registerUserScript() {
-    const keys = JSON.parse((await chrome.storage.local.get("keys")).keys) || []
+    const keys = JSON.parse((await StorageWrapper.shortkeys).keys) || []
     const javascriptActions = keys.filter(key => key.action === "javascript")
 
     const actionHandlersAsObject = javascriptActions.reduce((acc, cur) => {
@@ -456,7 +459,7 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (action === 'getKeys') {
     (async () => {
       const currentUrl = request.url
-      const keysFromStorage = await chrome.storage.local.get("keys")
+        const keysFromStorage = await StorageWrapper.shortkeys
       const settings = {}
       if (keysFromStorage.keys) {
         settings.keys = JSON.parse(keysFromStorage.keys)
