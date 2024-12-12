@@ -147,6 +147,22 @@ class StorageWrapper {
   }
 
   static _saveLargeData(key, data, callback) {
+    chrome.storage.sync.get(null, (result) => {
+      const length = result[`${key}_length`];
+      if (length !== undefined) {
+        const keysToRemove = Array.from({ length }, (_, index) => `${key}_part${index}`);
+        keysToRemove.push(`${key}_length`);
+
+        chrome.storage.sync.remove(keysToRemove, () => {
+          this._saveDataChunks(key, data, callback);
+        });
+      } else {
+        this._saveDataChunks(key, data, callback);
+      }
+    });
+  }
+
+  static _saveDataChunks(key, data, callback) {
     const chunks = this._splitIntoChunks(data);
     const storageObject = {};
 
