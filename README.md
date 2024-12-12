@@ -1,13 +1,10 @@
-# Shortkeys
+# NetSuite Keyboard Shortcuts
 
-Custom keyboard shortcuts for your browser
+Custom keyboard shortcuts for NetSuite
 
-[Donate](https://salt.bountysource.com/teams/chrome-shortkeys) | 
-[Add a Review](https://chrome.google.com/webstore/detail/shortkeys-custom-keyboard/logpjaacgmcbpdkdchjiaagddngobkck/reviews) | 
-[Documentation](https://github.com/mikecrittenden/shortkeys/wiki/How-To-Use-Shortkeys) | 
-[Support](https://github.com/mikecrittenden/shortkeys/issues) | 
-[Firefox Add-on](https://addons.mozilla.org/firefox/addon/shortkeys/) |
-[Chrome Webstore](https://chrome.google.com/webstore/detail/shortkeys-custom-keyboard/logpjaacgmcbpdkdchjiaagddngobkck)
+[Add a Review](https://chromewebstore.google.com/detail/netsuite-keyboard-shortcu/dgfhjidfjpggcejapjbpadkngnbefdla/reviews) | 
+[Documentation](https://www.travizer.com/netsuite-keyboard-shortcuts.html) | 
+[Chrome Webstore](https://chromewebstore.google.com/detail/netsuite-keyboard-shortcu/dgfhjidfjpggcejapjbpadkngnbefdla)
 
 ## Install
 

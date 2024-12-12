@@ -1,5 +1,5 @@
 {
-  "name": "ns-shortkeys",
+  "name": "netsuite-keyboard-shortcuts",
   "version": "2.0",
   "description": "Custom keyboard shortcuts for NetSuite",
   "scripts": {
