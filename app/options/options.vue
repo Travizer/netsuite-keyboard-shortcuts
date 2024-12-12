@@ -47,20 +47,34 @@
                     In order for JavaScript actions to work, you must first enable Developer Mode in your browser extension settings. Follow the instructions <a href="https://developer.chrome.com/docs/extensions/reference/api/userScripts#developer_mode_for_extension_users" target="_blank">here</a>, then come back and save your shortcuts.
                 </b-message>
 
+                <div class="level">
+                    <div class="level-left">
+                        <b-field>
+                        </b-field>
+                    </div>
+                    <div class="level-right">
+                        <b-field>
+                            <b-button @click="saveShortcuts">Save Shortcuts</b-button> &nbsp;
+                            <b-button @click="removelAllShortcuts">Remove All</b-button> &nbsp;
+                            <b-button @click="restoreShortcuts">Restore Defaults</b-button>
+                        </b-field>
+                    </div>
+                </div>
+
                 <b-table
                         :data="keys"
                         ref="table">
 
                     <template slot-scope="props">
-                        <b-table-column field="key" label="Shortcut" sortable>
+                        <b-table-column field="key" label="Keyboard Shortcut" width="250" sortable>
                             <b-field>
-                                <b-input placeholder="Example: ctrl+a" v-model="props.row.key"/>
+                                <b-input placeholder="Example: hom, sol, ctrl+1, etc." v-model="props.row.key"/>
                             </b-field>
                         </b-table-column>
 
-                        <b-table-column field="label" label="Label" sortable>
+                        <b-table-column field="label" label="Label" width="350" sortable>
                             <b-field>
-                                <b-input v-model="props.row.label"/>
+                                <b-input placeholder="Example: homepage, invoice list, etc." v-model="props.row.label"/>
                             </b-field>
                         </b-table-column>
 
@@ -74,11 +88,17 @@
                             </b-field>
                         </b-table-column>-->
 
-                      <b-table-column field="code" label="Code" sortable>
+                      <b-table-column field="url" label="NetSuite URL/Function" sortable>
+                          <b-field>
+                              <b-input v-model="props.row.url" @input="updateCodeFromUrl(props.row)" placeholder="Enter URL or function"/>
+                          </b-field>
+                      </b-table-column>
+
+                      <!--<b-table-column field="code" label="Code" sortable>
                         <b-field>
                           <b-input v-model="props.row.code"/>
                         </b-field>
-                      </b-table-column>
+                      </b-table-column>-->
 
                         <b-table-column field="delete">
                             <b-button rounded icon-right="delete" @click="deleteShortcut(props.row)" />
@@ -200,14 +220,14 @@
                 </div>
             </b-tab-item>
             <b-tab-item label="Export">
-                <pre>{{ keys }}</pre>
+                <pre>{{ exportKeys }}</pre>
             </b-tab-item>
         </b-tabs>
     </section>
 </template>
 
 <script>
-import { v4 as uuid } from "uuid";
+import {v4 as uuid} from "uuid";
 import TextInput from "./components/TextInput";
 import LinkBar from "./components/LinkBar";
 import SelectInput from "./components/SelectInput";
@@ -237,22 +257,142 @@ export default {
                 return true;
             }
         },
+        extractUrlOrFunction(item) {
+            if (item.label && item.label.indexOf('function:') > -1) {
+                return item.label;
+            } else {
+                const regex = /'(app\/[^';]+)/;
+                const matches = item.code && item.code.match(regex);
+
+                return matches ? matches[1] : '';
+            }
+        },
+        expandKey(key) {
+            if(!key) {
+                return '';
+            }
+
+            const SPECIAL_KEYS = [
+                'alt', 'ctrl', 'shift', 'meta', 'option', 'command',
+                'backspace', 'tab', 'enter', 'return', 'capslock', 'esc', 'escape', 'space', 'pageup', 'pagedown', 'end',
+                'home', 'left', 'up', 'right', 'down', 'ins', 'del', 'plus'
+            ];
+
+            if (SPECIAL_KEYS.some(specialKey => key.includes(specialKey))) {
+                return key;
+            } else {
+                let collapsedKey = this.collapseKey(key);
+                return collapsedKey.replace(',', ' ').split('').join(' ');
+            }
+        },
+        collapseKey(key) {
+            return key.replace(/\s+/g, '');
+        },
+        updateCodeFromUrl(item) {
+            item.code = this.urlOrFunctionToCode(item.url);
+        },
+        urlOrFunctionToCode(url) {
+            if(this.isFunctionUrl(url)) {
+                return this.functionToCode(url);
+            } else {
+                return this.urlToCode(url);
+            }
+        },
+        isFunctionUrl(url) {
+            return url && url.trim().startsWith('function:');
+        },
+        functionToCode(url) {
+            switch(url) {
+                case "function:transaction-new":
+                    return "javascript:NLInvokeButton(getButton('new'))";
+
+                case "function:transaction-copy":
+                    return "javascript:NLInvokeButton(getButton('makecopy'))";
+
+                case "function:transaction-delete":
+                    return "javascript:NLInvokeButton(getButton('delete'))";
+
+                case "function:transaction-memorize":
+                    return "javascript:NLInvokeButton(getButton('memorize'))";
+
+                case "function:transaction-email":
+                    return "javascript:NLInvokeButton(getButton('email'))";
+
+                case "function:open-shortcuts":
+                    return "javascript: /*--do not remove this comment--*/ (function() {f = 'https://www.travizer.com/netsuite-keyboard-shortcuts-list.html';if (!window.open(f)) location.href = f;})()";
+
+                case "function:mark-madatory-fields":
+                case "function:mark-mandatory-fields":
+                    return "var spans= document.getElementsByTagName('span'); for (var i = 0, len = spans.length; i < len; ++i) {  if(spans[i].innerHTML.indexOf('uir-required-icon') !== -1 && spans[i].id.indexOf('_label') == -1 ) {     spans[i].style.backgroundColor = 'yellow'; } }";
+
+                default:
+                    return "app/center/card.nl?sc=-29&whence=";
+            }
+        },
+        urlToCode(url) {
+            return `javascript: (function() {f = window.location.href.split('app/')[0] + '${url}'; window.open(f,'_self');})()`;
+        },
+        loadAndPrepareKeysFromJson(keys) {
+            this.keys = JSON.parse(keys).filter(key => key.label !== "newtab");
+            this.keys.forEach(item => {
+                item.key = this.collapseKey(item.key);
+                item.url = this.extractUrlOrFunction(item);
+            });
+        },
+        removelAllShortcuts: async function() {
+            this.keys = [];
+
+            this.$buefy.snackbar.open("You need to save your changes.");
+        },
+        restoreShortcuts: async function() {
+            this.loadAndPrepareKeysFromJson(StorageWrapper.defaultShortkeysJson());
+
+            this.$buefy.snackbar.open("You need to save your changes.");
+        },
         saveShortcuts: async function() {
+            let keysToSave = [];
             this.keys.forEach((key) => {
-                if (!key.id) {
-                    key.id = uuid();
+                const keyCopy = {...key};
+                keyCopy.key = this.expandKey(keyCopy.key);
+
+                if (!keyCopy.id) {
+                    keyCopy.id = uuid();
                 }
 
-                key.sites = key.sites || "";
-                key.sitesArray = key.sites.split('\n');
-                delete key.sidebarOpen;
+                keyCopy.sites = keyCopy.sites || "";
+                keyCopy.sitesArray = keyCopy.sites.split('\n');
+                delete keyCopy.sidebarOpen;
+
+                keysToSave.push(keyCopy);
+
+                this.addNewTabShortcut(keysToSave, keyCopy);
             });
-            StorageWrapper.shortkeys = { keys: JSON.stringify(this.keys) };
-            this.$buefy.snackbar.open(`Shortcuts have been saved!`);
+
+            StorageWrapper.shortkeys = { keys: JSON.stringify(keysToSave) };
+            this.$buefy.snackbar.open(`Shortcuts have been saved!<br>Refresh NetSuite pages to use the updated shortcuts.`);
+        },
+        addNewTabShortcut: function(keys, item) {
+            if (!this.isFunctionUrl(item.url)) {
+                keys.push({
+                    "id": uuid(),
+                    "key": "n " + item.key,
+                    "label": "newtab",
+                    "action": "javascript",
+                    "sites": "",
+                    "sitesArray": [""],
+                    "activeInInputs": true,
+                    "blacklist": false,
+                    "code": `javascript: (function() {f = window.location.href.split('app/')[0] + '${item.url}'; if (!window.open(f)) location.href = f;})()`
+                });
+            }
         },
         importKeys: function() {
-            this.keys = this.keys.concat(JSON.parse(this.importJson));
-            this.$buefy.snackbar.open(`Imported successfully!`);
+            try {
+                this.keys = this.keys.concat(JSON.parse(this.importJson));
+                this.$buefy.snackbar.open(`Imported successfully!`);
+            } catch (e) {
+                this.$buefy.snackbar.open(`Invalid shortcuts!`);
+            }
         },
         deleteShortcut: function (key) {
             this.$buefy.dialog.confirm({
@@ -373,6 +513,17 @@ export default {
             }
         }
     },
+    computed: {
+        exportKeys() {
+            return this.keys.map(key => {
+                const { id, url, ...keyCopy } = key;
+
+                keyCopy.key = this.expandKey(keyCopy.key);
+
+                return keyCopy;
+            });
+        }
+    },
     async created() {
         const processBookmarks = (bookmarks) => {
             for (let i = 0; i < bookmarks.length; i++) {
@@ -388,14 +539,14 @@ export default {
 
         const savedKeys = await StorageWrapper.shortkeys
         if (savedKeys.keys) {
-                this.keys = [...JSON.parse(savedKeys.keys)];
+            this.loadAndPrepareKeysFromJson(savedKeys.keys);
         } else {
             // Fallback to localStorage if chrome.storage.local has no keys.
             // This supports the manifest v2 to v3 migratoin path.
             this.keys = localStorage.shortkeys ? JSON.parse(localStorage.shortkeys).keys : [{}];
         }
 
-        chrome.bookmarks.getTree(processBookmarks)
+        //chrome.bookmarks.getTree(processBookmarks)
     },
 };
 </script>
