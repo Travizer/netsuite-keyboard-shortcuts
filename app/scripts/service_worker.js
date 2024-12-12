@@ -433,7 +433,11 @@ async function registerUserScript() {
     }
 }
 
-chrome.storage.local.onChanged.addListener(registerUserScript)
+(async () => {
+  await registerUserScript();
+})()
+
+chrome.storage.sync.onChanged.addListener(registerUserScript)
 
 chrome.runtime.onInstalled.addListener(async function (details) {
   if (details.reason === "update") {
