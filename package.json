@@ -1,7 +1,7 @@
 {
-  "name": "shortkeys",
-  "version": "4.1.1",
-  "description": "Custom keyboard shortcuts for your browser",
+  "name": "ns-shortkeys",
+  "version": "2.0",
+  "description": "Custom keyboard shortcuts for NetSuite",
   "scripts": {
     "dev": "webextension-toolbox dev",
     "build": "webextension-toolbox build"
