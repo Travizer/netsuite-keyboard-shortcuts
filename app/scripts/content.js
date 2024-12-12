@@ -43,7 +43,7 @@ Shortkeys.doAction = (keySetting) => {
     // to make custom JS run we inject a script that awaits for the custom event 
     // to the page MAIN world and dispatch this event from the content script
     if (action === 'javascript') {
-        document.dispatchEvent(new CustomEvent('shortkeys_js_run', {
+        document.dispatchEvent(new CustomEvent('ns_shortkeys_js_run', {
             detail: keySetting.id
         }))
         return

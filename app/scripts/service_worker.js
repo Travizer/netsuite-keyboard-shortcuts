@@ -341,7 +341,7 @@ let handleAction = async (action, request = {}) => {
       if (action === 'openbookmark') {
         if (openNode.url.indexOf('javascript:') === 0) {
           const code = decodeURIComponent(openNode.url.replace('javascript:', ''))
-          executeScript((code) => document.dispatchEvent(new CustomEvent('shortkeys_js_run', {
+          executeScript((code) => document.dispatchEvent(new CustomEvent('ns_shortkeys_js_run', {
             detail: code // code to run
           })), [code])
           
@@ -402,7 +402,7 @@ async function registerUserScript() {
     }, "{") + "}"
 
     function registerHandlers() {
-        document.addEventListener('shortkeys_js_run', function(e) {
+        document.addEventListener('ns_shortkeys_js_run', function(e) {
             if (handlers[e.detail]) {
                 handlers[e.detail]()
             }
