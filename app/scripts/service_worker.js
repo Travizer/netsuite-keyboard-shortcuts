@@ -468,14 +468,14 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       if (keysFromStorage.keys) {
         settings.keys = JSON.parse(keysFromStorage.keys)
       } else {
-        chrome.notifications.create('settingsNotification', {
+        /*chrome.notifications.create('settingsNotification', {
           type: 'basic',
           iconUrl: '/images/icon_128.png',
           title: 'Shortkeys upgraded',
           message: 'Action needed: re-save your shortcuts to continue using them.',
           requireInteraction: true,
           buttons: [{title: "Open and re-save settings"}]
-        });
+        });*/
       }
       let keys = []
 
