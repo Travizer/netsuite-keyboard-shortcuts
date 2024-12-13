@@ -29,7 +29,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*.app.netsuite.com/*"],
+      "matches": ["https://*.netsuite.com/*"],
       "js": ["scripts/content.js"],
       "run_at": "document_end",
       "all_frames": false
@@ -44,14 +44,14 @@
     "activeTab",
     "userScripts"
   ],
-  "host_permissions": ["https://*.app.netsuite.com/*"],
+  "host_permissions": ["https://*.netsuite.com/*"],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline'; style-src-elem 'self' 'unsafe-inline' https://cdn.materialdesignicons.com https://cdn.jsdelivr.net;"
   },
   "web_accessible_resources": [
     {
       "resources": ["/scripts/script-to-inject.js"],
-      "matches": ["https://*.app.netsuite.com/*"]
+      "matches": ["https://*.netsuite.com/*"]
     }
   ]
 }
