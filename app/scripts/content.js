@@ -1,6 +1,7 @@
 'use strict'
 /* global Mousetrap */
 import Mousetrap from 'mousetrap'
+import './inject-scripts/inject.js'
 
 if (typeof browser === "undefined") {
   var browser = chrome;
@@ -44,7 +45,7 @@ Shortkeys.doAction = (keySetting) => {
     // to the page MAIN world and dispatch this event from the content script
     if (action === 'javascript') {
         document.dispatchEvent(new CustomEvent('ns_shortkeys_js_run', {
-            detail: keySetting.id
+            detail: keySetting.code // code to run
         }))
         return
     } else if (action === 'trigger') {

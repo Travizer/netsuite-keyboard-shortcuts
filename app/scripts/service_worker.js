@@ -391,60 +391,60 @@ async function checkKeys() {
   StorageWrapper.shortkeys = { keys: JSON.stringify(keys) };
 }
 
-async function registerUserScript() {
-    const keys = JSON.parse((await StorageWrapper.shortkeys).keys) || []
-    const javascriptActions = keys.filter(key => key.action === "javascript")
-
-    const actionHandlersAsObject = javascriptActions.reduce((acc, cur) => {
-        acc += JSON.stringify(cur.id) + ":"
-        acc += "function() {" + cur.code + "},"
-        return acc
-    }, "{") + "}"
-
-    function registerHandlers() {
-        document.addEventListener('ns_shortkeys_js_run', function(e) {
-            if (handlers[e.detail]) {
-                handlers[e.detail]()
-            }
-        })
-    }
-
-    const existingScripts = await chrome.userScripts.getScripts({
-        ids: ["shortkeys-actions"]
-    })
-
-    const scripts = [
-        {
-            id: "shortkeys-actions",
-            matches: [ "*://*/*" ],
-            world: "MAIN",
-            js: [
-                {
-                    code: `const handlers = ${actionHandlersAsObject};\n(${registerHandlers.toString()})();`
-                }
-            ]
-        }
-    ]
-
-    if (existingScripts.length) {
-        await chrome.userScripts.update(scripts)
-    } else {
-        await chrome.userScripts.register(scripts)
-    }
-}
-
-(async () => {
-  await registerUserScript();
-})()
-
-chrome.storage.sync.onChanged.addListener(registerUserScript)
-
-chrome.runtime.onInstalled.addListener(async function (details) {
-  if (details.reason === "update") {
-    await checkKeys()
-    registerUserScript()
-  }
-})
+// async function registerUserScript() {
+//     const keys = JSON.parse((await StorageWrapper.shortkeys).keys) || []
+//     const javascriptActions = keys.filter(key => key.action === "javascript")
+//
+//     const actionHandlersAsObject = javascriptActions.reduce((acc, cur) => {
+//         acc += JSON.stringify(cur.id) + ":"
+//         acc += "function() {" + cur.code + "},"
+//         return acc
+//     }, "{") + "}"
+//
+//     function registerHandlers() {
+//         document.addEventListener('ns_shortkeys_js_run', function(e) {
+//             if (handlers[e.detail]) {
+//                 handlers[e.detail]()
+//             }
+//         })
+//     }
+//
+//     const existingScripts = await chrome.userScripts.getScripts({
+//         ids: ["shortkeys-actions"]
+//     })
+//
+//     const scripts = [
+//         {
+//             id: "shortkeys-actions",
+//             matches: [ "*://*/*" ],
+//             world: "MAIN",
+//             js: [
+//                 {
+//                     code: `const handlers = ${actionHandlersAsObject};\n(${registerHandlers.toString()})();`
+//                 }
+//             ]
+//         }
+//     ]
+//
+//     if (existingScripts.length) {
+//         await chrome.userScripts.update(scripts)
+//     } else {
+//         await chrome.userScripts.register(scripts)
+//     }
+// }
+//
+// (async () => {
+//   await registerUserScript();
+// })()
+//
+// chrome.storage.sync.onChanged.addListener(registerUserScript)
+//
+// chrome.runtime.onInstalled.addListener(async function (details) {
+//   if (details.reason === "update") {
+//     await checkKeys()
+//     registerUserScript()
+//   }
+// })
 
 browser.commands.onCommand.addListener(function (command) {
   // Remove the integer and hyphen at the beginning.
