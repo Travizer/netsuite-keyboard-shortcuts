@@ -196,7 +196,7 @@
                 <div class="level">
                     <div class="level-left">
                         <b-field>
-                            <b-button @click="keys.push({ action: 'javascript' })">Add shortcut</b-button>
+                            <b-button @click="keys.push({ action: 'javascript' })" :disabled="keys.length >= 256">Add shortcut</b-button>
                         </b-field>
                     </div>
                     <div class="level-right">

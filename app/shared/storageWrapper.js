@@ -194,6 +194,7 @@ class StorageWrapper {
       this._loadLargeData('shortkeys', (data) => {
         if (data) {
           let jsonData = JSON.parse(data);
+          // 2025-01-03: remove migration at some point
           if (jsonData.keys && Array.isArray(jsonData.keys)) {
             const transformedKeys = jsonData.keys.map(key => ({
               ...key,
@@ -204,7 +205,7 @@ class StorageWrapper {
             });
             resolve({ keys: JSON.stringify(transformedKeys) });
           } else {
-            resolve({ keys: data });
+            resolve({ keys: this.populateMissingProperties(data) });
           }
         } else {
           resolve({ keys: null });
@@ -213,8 +214,38 @@ class StorageWrapper {
     });
   }
 
+  static populateMissingProperties(data) {
+    const defaultProperties = {
+      action: "javascript",
+      sites: "",
+      sitesArray: [""],
+      activeInInputs: true,
+      blacklist: false,
+      // id: how to make it different every time?
+    };
+
+    const parsedData = JSON.parse(data);
+
+    const updatedData = parsedData.map(item => {
+      Object.keys(defaultProperties).forEach(prop => {
+        if (!item.hasOwnProperty(prop)) {
+          item[prop] = defaultProperties[prop];
+        }
+      });
+      return item;
+    });
+
+    return JSON.stringify(updatedData, null, 2);
+  }
+
   static set shortkeys(value) {
-    this._saveLargeData('shortkeys', value.keys, () => {
+    const filteredKeys = JSON.parse(value.keys).map(({ key, label, code }) => ({
+      key,
+      label,
+      code,
+    }));
+
+    this._saveLargeData('shortkeys', JSON.stringify(filteredKeys), () => {
       console.log("Shortkeys data saved in chunks to chrome.storage.sync.");
     });
   }
