@@ -9,3 +9,10 @@
 .p-1 {
     padding: 1em;
 }
+
+.export-json,
+.json-box textarea {
+    height: 60vh;
+    max-height: 60vh;
+    overflow: auto;
+}

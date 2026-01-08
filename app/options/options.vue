@@ -208,10 +208,12 @@
             </b-tab-item>
             <b-tab-item label="Import">
                 <b-field>
-                    <b-input type="textarea" v-model="importJson" />
+                    <b-input class="json-box" type="textarea" v-model="importJson" />
                 </b-field>
                 <div class="level">
-                    <div class="level-left"></div>
+                    <div class="level-left">
+                        <p class="help">Imported shortcuts are appended to your existing list (no overwrites).</p>
+                    </div>
                     <div class="level-right">
                         <b-field>
                             <b-button @click="importKeys">Import</b-button>
@@ -220,7 +222,17 @@
                 </div>
             </b-tab-item>
             <b-tab-item label="Export">
-                <pre>{{ exportKeys }}</pre>
+                <pre class="export-json">{{ exportKeys }}</pre>
+                <div class="level">
+                    <div class="level-left">
+                        <p class="help">Copy this JSON to share or back up your shortcuts.</p>
+                    </div>
+                    <div class="level-right">
+                        <b-field>
+                            <b-button @click="copyExport">Copy Export</b-button>
+                        </b-field>
+                    </div>
+                </div>
             </b-tab-item>
         </b-tabs>
     </section>
@@ -388,8 +400,24 @@ export default {
         },
         importKeys: function() {
             try {
-                this.keys = this.keys.concat(JSON.parse(this.importJson));
-                this.$buefy.snackbar.open(`Imported successfully!`);
+                const imported = JSON.parse(this.importJson)
+                    .filter(key => key.label !== "newtab")
+                    .map(item => {
+                        const keyCopy = { ...item };
+                        if (keyCopy.key) {
+                            keyCopy.key = this.collapseKey(keyCopy.key);
+                        }
+                        if (!keyCopy.url) {
+                            keyCopy.url = this.extractUrlOrFunction(keyCopy);
+                        }
+                        if (!keyCopy.code && keyCopy.url) {
+                            keyCopy.code = this.urlOrFunctionToCode(keyCopy.url);
+                        }
+                        return keyCopy;
+                    });
+                this.keys = this.keys.concat(imported);
+                this.importJson = "";
+                this.$buefy.snackbar.open(`Imported successfully! Remember to save to persist.`);
             } catch (e) {
                 this.$buefy.snackbar.open(`Invalid shortcuts!`);
             }
@@ -399,6 +427,14 @@ export default {
                 message: 'Delete this shortcut?',
                 onConfirm: () => this.keys = this.keys.filter(curKey => key.key !== curKey.key)
             });
+        },
+        copyExport: async function() {
+            try {
+                await navigator.clipboard.writeText(JSON.stringify(this.exportKeys));
+                this.$buefy.snackbar.open(`Export copied to clipboard.`);
+            } catch (e) {
+                this.$buefy.snackbar.open(`Unable to copy export.`);
+            }
         },
         isBuiltIn: function (action) {
             let builtIn = false;
